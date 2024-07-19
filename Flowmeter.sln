@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flowmeter", "Flowmeter\Flowmeter.csproj", "{3046CFC6-0CDE-4E3B-989B-D4F1C99FA3EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3046CFC6-0CDE-4E3B-989B-D4F1C99FA3EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3046CFC6-0CDE-4E3B-989B-D4F1C99FA3EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3046CFC6-0CDE-4E3B-989B-D4F1C99FA3EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3046CFC6-0CDE-4E3B-989B-D4F1C99FA3EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F00DD30E-F9DF-4C81-8742-C1C8D98A3C8B}
+	EndGlobalSection
+EndGlobal
