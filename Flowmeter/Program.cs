@@ -4,6 +4,7 @@ using Discord.Rest;
 using Discord.WebSocket;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reactive;
 using кансоль = System.Console;
@@ -286,10 +287,26 @@ namespace Flowmeter {
 > - **reply_type **
 > - - react - read lines above
 > - - delete - deletes the message
-[support server](https://discord.gg/kCStS6pYqr) (kind of) | [source code](https://github.com/tema5002/flowmeter)",
+[support server](https://discord.gg/kCStS6pYqr) (kind of) | [source code](https://github.com/tema5002/flowmeter-cs)",
                 Color = 0x00FFFF
             };
             await RespondAsync(embed: embed.Build());
+        }
+
+        [SlashCommand("check", "check by which tags message was triggered")]
+        public async Task Check(string h) {
+            string[] TAGS = (from x in Program.GetTags(((SocketGuildChannel)Context.Channel).Guild.Id) where 3 <= x.Count(c => c == ';') && x.Count(c => c == ';') <= 4 && Program.Check(x, h) select x).ToArray();
+            if (TAGS.Length > 0) {
+                await RespondAsync(
+                    embed: new EmbedBuilder() {
+                        Title = $"{h} was triggered by {TAGS.Length} tags",
+                        Description = string.Join("\n", from i in TAGS select $"- {i}")
+                    }.Build()
+                );
+            }
+            else {
+                await RespondAsync("null <:fluent_bug:1203623430948130866>");
+            }
         }
     }
 }
