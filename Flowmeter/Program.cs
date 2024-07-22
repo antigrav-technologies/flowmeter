@@ -3,14 +3,10 @@ using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
 using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Reactive;
 using кансоль = System.Console;
 
 namespace Flowmeter {
-    partial class Program {
+    partial class Program : object {
         string token = "";
         DiscordSocketClient client;
         InteractionService interactionService;
@@ -138,6 +134,12 @@ namespace Flowmeter {
             if (msgl.StartsWith(Data.prefix) && !message.Author.IsBot) {
                 msgl = msgl[Data.prefix.Length..];
 
+                if (msgl == "serialize yourself") {
+                    if (message.Author.Id == 558979299177136164) {
+                        await message.Channel.SendMessageAsync("nah bruvver thats not pythin");
+                    }
+                }
+
                 if (msgl == "can i add tags") {
                     if (SkillIssued((IGuildUser)message.Author)) {
                         await message.ReplyAsync("No shitting Sherlocking 🔒\nHow to Sherlock your Shit Tutorial");
@@ -247,7 +249,7 @@ namespace Flowmeter {
         public static DateTime StartTime = DateTime.MinValue;
         public static string prefix = "hey flowmeter ";
         public static async Task<RestMessage> ReplyAsync(this IMessage msg,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageComponent components = null, ISticker[] stickers = null, Embed[] embeds = null, MessageFlags flags = MessageFlags.None) {
+            string? text = null, bool isTTS = false, Embed? embed = null, RequestOptions? options = null, AllowedMentions? allowedMentions = null, MessageComponent? components = null, ISticker[]? stickers = null, Embed[]? embeds = null, MessageFlags flags = MessageFlags.None) {
             return (RestMessage)await msg.Channel.SendMessageAsync(text, isTTS, embed, options, allowedMentions, new MessageReference(msg.Id), components, stickers, embeds, flags);
         }
     }
