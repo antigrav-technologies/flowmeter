@@ -13,7 +13,7 @@ namespace Flowmeter {
         static Task Main(string[] args) => new Program().MainAsync();
         // bot setup is done here
         async Task MainAsync() {
-            token = File.ReadAllText("D:\\bot tokens\\flowmeter.txt");
+            token = File.ReadAllText("TOKEN.txt");
             client = new DiscordSocketClient(new DiscordSocketConfig() {
                 GatewayIntents = GatewayIntents.All,
                 UseInteractionSnowflakeDate = false
