@@ -7,18 +7,15 @@ using кансоль = System.Console;
 
 namespace Flowmeter {
     partial class Program : object {
-        string token = "";
-        DiscordSocketClient client;
-        InteractionService interactionService;
-        static Task Main(string[] args) => new Program().MainAsync();
+        readonly static string token = File.ReadAllText("TOKEN.txt");
+        readonly static DiscordSocketClient client = new(new DiscordSocketConfig() {
+            GatewayIntents = GatewayIntents.All,
+            UseInteractionSnowflakeDate = false
+        });
+        readonly InteractionService interactionService = new(client.Rest);
+        static Task Main() => new Program().MainAsync();
         // bot setup is done here
         async Task MainAsync() {
-            token = File.ReadAllText("TOKEN.txt");
-            client = new DiscordSocketClient(new DiscordSocketConfig() {
-                GatewayIntents = GatewayIntents.All,
-                UseInteractionSnowflakeDate = false
-            });
-            interactionService = new InteractionService(client.Rest);
             await interactionService.AddModuleAsync<CommandModule>(null);
             client.Log += Log;
             client.Ready += Ready;
@@ -65,7 +62,7 @@ namespace Flowmeter {
             return Task.CompletedTask;
         }
 
-        string[] games = [
+        readonly static string[] games = [
             "Minecraft",
             "Half-Life 2",
             "Among Us",
@@ -86,18 +83,25 @@ namespace Flowmeter {
             "Code::Blocks 20.03",
             "wuggy games"
         ];
+
+        readonly static ulong[] botsToReplyTo = [
+            811569586675515433,  // ammeter
+            1030817797921583236, // ICOSAHEDROOOOOOOO
+            1204295911367512084  // abotmination amotbination
+        ];
+
         private async Task<Task> Ready() {
             await interactionService.RegisterCommandsGloballyAsync();
             Data.StartTime = DateTime.Now;
 
-            Random random = new Random();
-            Console.WriteLine($"@{client.ToString} is now ready");
+            Random random = new();
+            кансоль.WriteLine($"@{client} is now ready");
 
             while (true) {
                 await client.SetGameAsync(games[random.Next(games.Length)]);
                 await Task.Delay(60 * 1000);
             }
-            return Task.CompletedTask;
+            //return Task.CompletedTask;
         }
 
         private async Task<Task> Client_MessageReceived(SocketMessage message) {
@@ -106,132 +110,133 @@ namespace Flowmeter {
             ulong guildID = ((SocketGuildChannel)message.Channel).Guild.Id;
             string guildName = ((SocketGuildChannel)message.Channel).Guild.Name;
 
-            foreach (string tag in GetTags(guildID)) {
-                string[] h = tag.Split(";");
-                if (3 <= h.Length && h.Length <= 4 && message.Author != client.CurrentUser) {
-                    string? reply_type = h.Length == 4 ? h[3].ToLower() : null;
-                    if (Check(tag, message.Content)) {
-                        string content = h[2];
-                        // misder krabs soon i guess
-                        if (reply_type == "react") {
-                            if (Emote.TryParse(content, out Emote emote)) {
-                                await message.AddReactionAsync(emote);
-                            }
-                            else if (Emoji.TryParse(content, out Emoji emoji)) {
-                                await message.AddReactionAsync(emoji);
+            if (!message.Author.IsBot || botsToReplyTo.Contains(message.Author.Id)) {
+                foreach (string tag in GetTags(guildID)) {
+                    string[] h = tag.Split(";");
+                    if (3 <= h.Length && h.Length <= 4) {
+                        string? reply_type = h.Length == 4 ? h[3].ToLower() : null;
+                        if (Check(tag, message.Content)) {
+                            string content = h[2];
+                            // misder krabs soon i guess
+                            if (reply_type == "react") {
+                                if (Emote.TryParse(content, out Emote emote)) {
+                                    await message.AddReactionAsync(emote);
+                                }
+                                else if (Emoji.TryParse(content, out Emoji emoji)) {
+                                    await message.AddReactionAsync(emoji);
+                                }
+                                else {
+                                    await message.ReplyAsync($"unknown emoji: `{content}`");
+                                }
                             }
                             else {
-                                await message.ReplyAsync($"unknown emoji: `{content}`");
+                                await message.Channel.SendMessageAsync(content);
                             }
                         }
-                        else {
-                            await message.Channel.SendMessageAsync(content);
+                    }
+                }
+
+                if (msgl.StartsWith(Data.prefix)) {
+                    msgl = msgl[Data.prefix.Length..];
+
+                    if (msgl == "serialize yourself") {
+                        if (message.Author.Id == 558979299177136164) {
+                            await message.Channel.SendMessageAsync("nah bruvver thats not pythin");
                         }
                     }
-                }
-            }
 
-            if (msgl.StartsWith(Data.prefix) && !message.Author.IsBot) {
-                msgl = msgl[Data.prefix.Length..];
-
-                if (msgl == "serialize yourself") {
-                    if (message.Author.Id == 558979299177136164) {
-                        await message.Channel.SendMessageAsync("nah bruvver thats not pythin");
-                    }
-                }
-
-                if (msgl == "can i add tags") {
-                    if (SkillIssued((IGuildUser)message.Author)) {
-                        await message.ReplyAsync("No shitting Sherlocking 🔒\nHow to Sherlock your Shit Tutorial");
-                    }
-                    else {
-                        await message.ReplyAsync("shore i guess");
-                    }
-                }
-                else if (msgl.StartsWith("add tag ")) {
-                    if (SkillIssued((IGuildUser)message.Author)) {
-                        await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
-                    }
-                    else {
-                        string rule = CheckRule(message.Content[(Data.prefix.Length + 8)..], guildID);
-                        if (!rule.Contains(';')) {
-                            await message.ReplyAsync(rule);
+                    if (msgl == "can i add tags") {
+                        if (SkillIssued((IGuildUser)message.Author)) {
+                            await message.ReplyAsync("No shitting Sherlocking 🔒\nHow to Sherlock your Shit Tutorial");
                         }
                         else {
-                            AddLine(guildID, rule);
-                            await message.ReplyAsync($"`{rule}` was added to **{guildName}**'s tags");
+                            await message.ReplyAsync("shore i guess");
                         }
                     }
-                }
-
-                else if (msgl.StartsWith("update tag ")) {
-                    if (SkillIssued((IGuildUser)message.Author)) {
-                        await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
-                    }
-                    else {
-                        string rule = CheckRule(message.Content[(Data.prefix.Length + 11)..], null);
-                        if (!rule.Contains(';')) {
-                            await message.ReplyAsync(rule);
+                    else if (msgl.StartsWith("add tag ")) {
+                        if (SkillIssued((IGuildUser)message.Author)) {
+                            await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
                         }
                         else {
-                            string[] ruleSplited = rule.Split(";").ToArray();
-                            string? oldRule = null;
-                            foreach (string tag in GetTags(guildID)) {
-                                if (tag.Split(";")[0] == ruleSplited[0]) {
-                                    oldRule = tag;
+                            string rule = CheckRule(message.Content[(Data.prefix.Length + 8)..], guildID);
+                            if (!rule.Contains(';')) {
+                                await message.ReplyAsync(rule);
+                            }
+                            else {
+                                AddLine(guildID, rule);
+                                await message.ReplyAsync($"`{rule}` was added to **{guildName}**'s tags");
+                            }
+                        }
+                    }
+
+                    else if (msgl.StartsWith("update tag ")) {
+                        if (SkillIssued((IGuildUser)message.Author)) {
+                            await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
+                        }
+                        else {
+                            string rule = CheckRule(message.Content[(Data.prefix.Length + 11)..], null);
+                            if (!rule.Contains(';')) {
+                                await message.ReplyAsync(rule);
+                            }
+                            else {
+                                string[] ruleSplited = [.. rule.Split(";")];
+                                string? oldRule = null;
+                                foreach (string tag in GetTags(guildID)) {
+                                    if (tag.Split(";")[0] == ruleSplited[0]) {
+                                        oldRule = tag;
+                                        break;
+                                    }
+                                }
+                                if (oldRule != null) {
+                                    RemoveLine(guildID, oldRule);
+                                    AddLine(guildID, rule);
+                                    await message.ReplyAsync($"updated `{oldRule}` to `{rule}` on **{guildName}**");
+                                }
+                                else {
+                                    await message.ReplyAsync("cant find that rule");
+                                }
+                            }
+                        }
+                    }
+
+                    else if (msgl.StartsWith("remove tag ")) {
+                        if (SkillIssued((IGuildUser)message.Author)) {
+                            await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
+                        }
+                        else {
+                            string[] tags = GetTags(guildID);
+                            string rule = message.Content[(Data.prefix.Length + 11)..];
+                            foreach (string tag in tags) {
+                                if (tag.Split(";")[0] == rule) {
+                                    rule = tag;
                                     break;
                                 }
                             }
-                            if (oldRule != null) {
-                                RemoveLine(guildID, oldRule);
-                                AddLine(guildID, rule);
-                                await message.ReplyAsync($"updated `{oldRule}` to `{rule}` on **{guildName}**");
+                            if (tags.Contains(rule)) {
+                                RemoveLine(guildID, rule);
+                                await message.ReplyAsync($"`{rule}` was removed from **{guildName}**'s tags");
                             }
                             else {
-                                await message.ReplyAsync("cant find that rule");
+                                await message.ReplyAsync($"`{rule}` is not an actual tag you silly");
                             }
                         }
                     }
-                }
 
-                else if (msgl.StartsWith("remove tag ")) {
-                    if (SkillIssued((IGuildUser)message.Author)) {
-                        await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
+                    else if (msgl == "list tags") {
+                        string[] t = (from x in GetTags(guildID) select x.Split(";")[0]).ToArray();
+                        await message.Channel.SendMessageAsync(
+                            embed: MakeListEmbed(1, t),
+                            components: MakeListComponents("UPDATELISTEMBED", 1, t)
+                        );
                     }
-                    else {
-                        string[] tags = GetTags(guildID);
-                        string rule = message.Content[(Data.prefix.Length + 11)..];
-                        foreach (string tag in tags) {
-                            if (tag.Split(";")[0] == rule) {
-                                rule = tag;
-                                break;
-                            }
-                        }
-                        if (tags.Contains(rule)) {
-                            RemoveLine(guildID, rule);
-                            await message.ReplyAsync($"`{rule}` was removed from **{guildName}**'s tags");
-                        }
-                        else {
-                            await message.ReplyAsync($"`{rule}` is not an actual tag you silly");
-                        }
+                    else if (message.Content[Data.prefix.Length..] == "DO WHAT THE FUCK DO YOU WANT") {
+                        int wuggy_number = (int)(new Random().NextDouble() * 1000000000) + 1;
+                        string[] t = (from x in GetTags(guildID) select x.Split(";")[0]).ToArray();
+                        await message.Channel.SendMessageAsync(
+                            embed: MakeListEmbed(wuggy_number, t),
+                            components: MakeListComponents("UPDATELISTEMBED", wuggy_number, t)
+                        );
                     }
-                }
-
-                else if (msgl == "list tags") {
-                    string[] t = (from x in GetTags(guildID) select x.Split(";")[0]).ToArray();
-                    await message.Channel.SendMessageAsync(
-                        embed: MakeListEmbed(1, t),
-                        components: MakeListComponents("UPDATELISTEMBED", 1, t)
-                    );
-                }
-                else if (message.Content[Data.prefix.Length..] == "DO WHAT THE FUCK DO YOU WANT") {
-                    Random random = new Random();
-                    int wuggy_number = (int)(random.NextDouble() * 1000000000) + 1;
-                    string[] t = (from x in GetTags(guildID) select x.Split(";")[0]).ToArray();
-                    await message.Channel.SendMessageAsync(
-                        embed: MakeListEmbed(wuggy_number, t),
-                        components: MakeListComponents("UPDATELISTEMBED", wuggy_number, t)
-                    );
                 }
             }
             return Task.CompletedTask;
@@ -255,9 +260,7 @@ namespace Flowmeter {
     }
 
     internal class CommandModule : InteractionModuleBase {
-        public CommandModule() {
-        }
-        public InteractionService Service {get; set;}
+        public InteractionService? Service {get; set;}
 
         [SlashCommand("ping", "get ping")]
         public async Task Ping() {
@@ -266,7 +269,7 @@ namespace Flowmeter {
 
         [SlashCommand("help", "get help")]
         public async Task Help() {
-            EmbedBuilder embed = new EmbedBuilder() {
+            await RespondAsync(embed: new EmbedBuilder() {
                 Title = "Flowmeter",
                 Description = $@"bot made by tema5002
 
@@ -291,8 +294,7 @@ namespace Flowmeter {
 > - - delete - deletes the message
 [support server](https://discord.gg/kCStS6pYqr) (kind of) | [source code](https://github.com/tema5002/flowmeter-cs)",
                 Color = 0x00FFFF
-            };
-            await RespondAsync(embed: embed.Build());
+            }.Build());
         }
 
         [SlashCommand("check", "check by which tags message was triggered")]

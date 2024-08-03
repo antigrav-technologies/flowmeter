@@ -1,35 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 
 namespace Flowmeter {
     partial class Program {
-        private static int p(string[] x) {
-            return (x.Length + 9) / 10;
-        }
-
-        public static Embed MakeListEmbed(int page, string[] list) {
-            long pages = p(list);
-            string description = "";
-            try {
-                list = list[(10 * (page - 1))..];
-                if (page != pages) list = list[..10];
-            }
-            catch (System.ArgumentOutOfRangeException) {
-                list = [];
-            }
-            foreach (string str in list) {
-                description += $"- {str}\n";
-            }
-            EmbedBuilder embed = new EmbedBuilder() {
-                Title = $"Page {page}/{pages}",
-                Description = description
-            };
-            return embed.Build();
-        }
+        public static Embed MakeListEmbed(int page, string[] list) => new EmbedBuilder() {
+            Title = $"Page {page}/{(list.Length + 9) / 10}",
+            Description = string.Join("\n", from s in list.Skip((page - 1) * 10).Take(page == (list.Length + 9) / 10 ? list.Length % 10 : 10) select $"- {s}")
+        }.Build();
 
         public static Discord.MessageComponent MakeListComponents(string what, int page, string[] pages) {
             ActionRowBuilder components = new();
@@ -40,7 +16,7 @@ namespace Flowmeter {
                 style: ButtonStyle.Secondary
             ).Build());
 
-            int m = p(pages);
+            int m = (pages.Length + 9) / 10;
             if (2 < page && page <= m   ) c("⏪", 1);
             if (1 < page && page <= m   ) c("<", page - 1);
             if (0 < page && page < m    ) c(">", page + 1);
