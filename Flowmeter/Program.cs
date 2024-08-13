@@ -278,7 +278,6 @@ internal class CommandModule : InteractionModuleBase {
 > Say *{Data.prefix}update tag keyword;detection_type;reply;reply_type* to **update already existing tag**
 > Say *{Data.prefix}remove tag keyword* to **remove tag**
 > Say *{Data.prefix}list tags* to **list existing tags on this server**
-> Say *{Data.prefix}sort tags* to sort tags on this server in alphabetic order
 > Commands Arguments
 > - **keyword** - keyword which triggers the reply
 > - **detection_type**:
@@ -288,24 +287,26 @@ internal class CommandModule : InteractionModuleBase {
 > - - **==** - exact match (it means case sensitive)
 > - - **startswith** - triggers when **reply** starts with **keyword**
 > - - **endswith** - triggers when **reply** ends with **keyword**
-> - **reply** - uhhhh a reply maybe
-> - - If you use 'react' in reply must be an emoji id or emoji itself if its unicode
+> - - **REGEX**/**regex** - case sensetive/not case sensetive regular expression
+> - **reply** - a reply
 > - **reply_type **
-> - - react - read lines above
+> - - react - if this argument is specified then **reply** must be emoji
 > - - delete - deletes the message
-[support server](https://discord.gg/kCStS6pYqr) (kind of) | [source code](https://github.com/tema5002/flowmeter-cs)",
+[support server](https://discord.gg/kCStS6pYqr) (kind of) | [source code](https://github.com/tema5002/flowmeter)",
             Color = 0x00FFFF
         }.Build());
     }
 
     [SlashCommand("check", "check by which tags message was triggered")]
     public async Task Check(string h) {
-        string[] TAGS = (from x in Program.GetTags(((SocketGuildChannel)Context.Channel).Guild.Id) where 3 <= x.Count(c => c == ';') && x.Count(c => c == ';') <= 4 && Program.Check(x, h) select x).ToArray();
+        string[] TAGS = (from x in Program.GetTags(((SocketGuildChannel)Context.Channel).Guild.Id)
+                         where 3 <= x.Count(c => c == ';') && x.Count(c => c == ';') <= 4 && Program.Check(x, h)
+                         select x).ToArray();
         if (TAGS.Length > 0) {
             await RespondAsync(
                 embed: new EmbedBuilder() {
-                    Title = $"{h} was triggered by {TAGS.Length} tags",
-                    Description = string.Join("\n", from i in TAGS select $"- {i}")
+                    Title = $"This was triggered by {TAGS.Length} tags",
+                    Description = string.Join("\n", from x in TAGS select $"- {x}")
                 }.Build()
             );
         }

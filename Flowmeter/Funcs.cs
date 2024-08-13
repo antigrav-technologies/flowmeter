@@ -80,7 +80,7 @@ partial class Program {
             return "reply cant be longer than 500 symbols";
         if (ruleSplited.Length > 3 && ruleSplited[3].Length > 30)
             return "why in the world you need reply type longer than 30 symbols";
-        string[] detectionTypes = ["=", "==", "default", "split", "startswith", "endswith", "regex"];
+        string[] detectionTypes = ["=", "==", "default", "split", "startswith", "endswith", "regex", "REGEX"];
         if (!detectionTypes.Contains(detectionType))
             return "incorrect detection type <:yeh:1183111141409435819>";
         if (rule.Contains('\n'))
