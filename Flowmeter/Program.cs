@@ -225,7 +225,7 @@ partial class Program : object {
                     );
                 }
                 else if (message.Content[Data.prefix.Length..] == "DO WHAT THE FUCK DO YOU WANT") {
-                    int wuggy_number = (int)(new Random().NextDouble() * 1000000000) + 1;
+                    int wuggy_number = (int)(Data.Random.NextDouble() * 1000000000) + 1;
                     string[] t = (from x in GetTags(guildID) select x.Split(";")[0]).ToArray();
                     await message.Channel.SendMessageAsync(
                         embed: MakeListEmbed(wuggy_number, t),
