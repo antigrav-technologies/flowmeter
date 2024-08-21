@@ -85,18 +85,12 @@ partial class Program : object {
         "wuggy games"
     ];
 
-    readonly static ulong[] botsToReplyTo = [
-        811569586675515433,  // ammeter
-        1030817797921583236, // ICOSAHEDROOOOOOOO
-        1204295911367512084  // abotmination amotbination
-    ];
-
     private async Task<Task> Ready() {
         await interactionService.RegisterCommandsGloballyAsync();
         Data.StartTime = DateTime.Now;
 
         Random random = new();
-        кансоль.WriteLine($"@{client} is now ready");
+        кансоль.WriteLine($"@{client.CurrentUser.Username}#{client.CurrentUser.Discriminator} is now ready");
 
         while (true) {
             await client.SetGameAsync(games[random.Next(games.Length)]);
@@ -111,27 +105,27 @@ partial class Program : object {
         ulong guildID = ((SocketGuildChannel)message.Channel).Guild.Id;
         string guildName = ((SocketGuildChannel)message.Channel).Guild.Name;
 
-        if (!message.Author.IsBot || botsToReplyTo.Contains(message.Author.Id)) {
+        if (!message.Author.IsBot || Data.botsToReplyTo.Contains(message.Author.Id)) {
             foreach (string tag in GetTags(guildID)) {
                 string[] h = tag.Split(";");
-                if (3 <= h.Length && h.Length <= 4) {
-                    string? reply_type = h.Length == 4 ? h[3].ToLower() : null;
+                if (3 <= h.Length) {
+                    string[] args = h.Length > 3 ? h.Skip(3).ToArray() : [];
                     if (Check(tag, message.Content)) {
                         string content = h[2];
                         // misder krabs soon i guess
-                        if (reply_type == "react") {
+                        if (args.Contains("react")) {
+                            IEmote emojiToReact = Emoji.Parse("🔲");
                             if (Emote.TryParse(content, out Emote emote)) {
-                                await message.AddReactionAsync(emote);
+                                emojiToReact = emote;
                             }
                             else if (Emoji.TryParse(content, out Emoji emoji)) {
-                                await message.AddReactionAsync(emoji);
+                                emojiToReact = emoji;
                             }
-                            else {
-                                await message.ReplyAsync($"unknown emoji: `{content}`");
-                            }
+                            await message.AddReactionAsync(emojiToReact);
                         }
                         else {
                             await message.Channel.SendMessageAsync(content);
+                            if (args.Contains("delete")) await message.DeleteAsync();
                         }
                     }
                 }
@@ -250,10 +244,38 @@ partial class Program : object {
 }
 
 internal static class Data {
-    public static Color EmbedColor = 0xFFFFFF;
-    public static ulong CreatorId = 0;
     public static DateTime StartTime = DateTime.MinValue;
     public static string prefix = "hey flowmeter ";
+    public static readonly List<ulong> CoolServers = [
+        1178285875608698951, // ctqa stnad
+        1202574174946861076, // h++
+        854614974525472798,  // a silly server
+        1183418786481700925, // this server is real fucked up
+        1232247180480479282  // cube's junkyard
+    ];
+    public readonly static ulong[] botsToReplyTo = [
+        811569586675515433,  // ammeter
+        1030817797921583236, // ICOSAHEDROOOOOOOO
+        1204295911367512084  // abotmination amotbination
+    ];
+    public readonly static ulong[] trustedPeople = [
+        558979299177136164,   // tema5002
+        903650492754845728,   // slinx92
+        986132157967761408,   // slinx93
+        1163914091270787125,  // dtpls20
+        801078409076670494,   // hexahedron1
+        1143072932596305932,  // kesslon1632
+        710621353128099901,   // rech2020
+        712639066373619754,   // aflyde
+        1186681736936050691,  // ammeter.
+        1122540181984120924,  // voltmeter2
+        1172796751216906351,  // aperturesanity
+        811569586675515433,   // ammeter
+        1030817797921583236,  // ICOSAHEDROOOOOOOO
+        1204295911367512084,  // abotmination amotbination
+        1056952213056004118   // lampadaire
+    ];
+    public static Random Random = new();
     public static async Task<RestMessage> ReplyAsync(this IMessage msg,
         string? text = null, bool isTTS = false, Embed? embed = null, RequestOptions? options = null, AllowedMentions? allowedMentions = null, MessageComponent? components = null, ISticker[]? stickers = null, Embed[]? embeds = null, MessageFlags flags = MessageFlags.None) {
         return (RestMessage)await msg.Channel.SendMessageAsync(text, isTTS, embed, options, allowedMentions, new MessageReference(msg.Id), components, stickers, embeds, flags);
@@ -274,8 +296,8 @@ internal class CommandModule : InteractionModuleBase {
             Title = "Flowmeter",
             Description = $@"bot made by tema5002
 
-> Say *{Data.prefix}add tag keyword;detection_type;reply;reply_type* to **add new tag**
-> Say *{Data.prefix}update tag keyword;detection_type;reply;reply_type* to **update already existing tag**
+> Say *{Data.prefix}add tag keyword;detection_type;reply;args* to **add new tag**
+> Say *{Data.prefix}update tag keyword;detection_type;reply;args* to **update already existing tag**
 > Say *{Data.prefix}remove tag keyword* to **remove tag**
 > Say *{Data.prefix}list tags* to **list existing tags on this server**
 > Commands Arguments
@@ -289,11 +311,11 @@ internal class CommandModule : InteractionModuleBase {
 > - - **endswith** - triggers when **reply** ends with **keyword**
 > - - **REGEX**/**regex** - case sensetive/not case sensetive regular expression
 > - **reply** - a reply
-> - **reply_type **
+> - **args**
 > - - react - if this argument is specified then **reply** must be emoji
 > - - delete - deletes the message
 [support server](https://discord.gg/kCStS6pYqr) (kind of) | [source code](https://github.com/tema5002/flowmeter)",
-            Color = 0x00FFFF
+            Color = new Color((uint)Data.Random.Next(0x1000000))
         }.Build());
     }
 

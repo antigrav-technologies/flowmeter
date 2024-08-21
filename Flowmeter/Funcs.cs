@@ -5,27 +5,10 @@ using System.Text.RegularExpressions;
 namespace Flowmeter;
 
 partial class Program {
+    public static bool SkillIssued(IGuildUser user) => !(user.GuildPermissions.Administrator || Data.trustedPeople.Contains(user.Id));
 
-    public static ulong[] trustedPeople = [
-        558979299177136164,   // tema5002
-        903650492754845728,   // slinx92
-        986132157967761408,   // slinx93
-        1163914091270787125,  // dtpls20
-        801078409076670494,   // hexahedron1
-        1143072932596305932,  // kesslon1632
-        710621353128099901,   // rech2020
-        712639066373619754,   // aflyde
-        1186681736936050691,  // ammeter.
-        1122540181984120924,  // voltmeter2
-        1172796751216906351,  // aperturesanity
-        811569586675515433,   // ammeter
-        1030817797921583236,  // ICOSAHEDROOOOOOOO
-        1204295911367512084   // abotmination amotbination
-    ];
-
-    public static bool SkillIssued(IGuildUser user) => !(user.GuildPermissions.Administrator || trustedPeople.Contains(user.Id));
-
-    public static string GetFilePath(ulong? id) {
+    public static string GetFilePath(ulong id) {
+        if (Data.CoolServers.Contains(id)) id = 1042064947867287643;
         string path = "D:\\flowmeter data\\tags";
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
@@ -35,7 +18,7 @@ partial class Program {
         return path;
     }
 
-    public static string[] GetTags(ulong? id) => File.ReadAllLines(GetFilePath(id));
+    public static string[] GetTags(ulong id) => File.ReadAllLines(GetFilePath(id));
 
     public static void AddLine(ulong id, string line) => File.AppendAllLines(GetFilePath(id), [line]);
 
@@ -64,6 +47,8 @@ partial class Program {
     }
 
     public static string CheckRule(string rule, ulong? guildID) {
+        string[] args = ["react", "delete"];
+        string[] detectionTypes = ["=", "==", "default", "split", "startswith", "endswith", "regex", "REGEX"];
         string[] ruleSplited = (from i in rule.Split(";") select i.Trim()).ToArray();
         rule = string.Join(";", ruleSplited);
         int a = ruleSplited.Length;
@@ -72,15 +57,14 @@ partial class Program {
         string keyword = ruleSplited[0];
         string detectionType = ruleSplited[1];
         string reply = ruleSplited[2];
-        if (guildID != null && GetTags(guildID).Any(tag => tag.Split(";")[0] == keyword))
+        if (guildID != null && GetTags((ulong)guildID).Any(tag => tag.Split(";")[0] == keyword))
             return "silly you already have added that tag";
         if (keyword.Length > 125)
             return "keyword cant be longer than 125 symbols";
         if (reply.Length > 500)
             return "reply cant be longer than 500 symbols";
-        if (ruleSplited.Length > 3 && ruleSplited[3].Length > 30)
-            return "why in the world you need reply type longer than 30 symbols";
-        string[] detectionTypes = ["=", "==", "default", "split", "startswith", "endswith", "regex", "REGEX"];
+        if (ruleSplited.Length > 3 && ruleSplited.Skip(3).Any(x => !args.Contains(x)))
+            return "unknown argument specified";
         if (!detectionTypes.Contains(detectionType))
             return "incorrect detection type <:yeh:1183111141409435819>";
         if (rule.Contains('\n'))
