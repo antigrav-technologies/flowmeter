@@ -4,6 +4,7 @@ using Discord.Rest;
 using Discord.WebSocket;
 using System.Data;
 using кансоль = System.Console;
+using static Flowmeter.Utils;
 
 namespace Flowmeter;
 
@@ -49,10 +50,10 @@ partial class Program : object {
         }
         else if (h_[0] == "UPDATELISTEMBED") {
             int page_to_go = int.Parse(h_[1]);
-            string[] t = (from x in GetTags(guildID) select x.Split(";")[0]).ToArray();
+            string[] tags = GetTags(guildID);
             await component.UpdateAsync(m => {
-                m.Embed = MakeListEmbed(page_to_go, t);
-                m.Components = MakeListComponents("UPDATELISTEMBED", page_to_go, t);
+                m.Embed = MakeListEmbed(page_to_go, tags);
+                m.Components = MakeListComponents("UPDATELISTEMBED", page_to_go, tags.Length);
             });
         }
         else {
@@ -218,18 +219,18 @@ partial class Program : object {
                 }
 
                 else if (msgl == "list tags") {
-                    string[] t = (from x in GetTags(guildID) select x.Split(";")[0]).ToArray();
+                    var tags = GetTags(guildID);
                     await message.Channel.SendMessageAsync(
-                        embed: MakeListEmbed(1, t),
-                        components: MakeListComponents("UPDATELISTEMBED", 1, t)
+                        embed: MakeListEmbed(1, tags),
+                        components: MakeListComponents("UPDATELISTEMBED", 1, tags.Length)
                     );
                 }
                 else if (message.Content[Data.prefix.Length..] == "DO WHAT THE FUCK DO YOU WANT") {
+                    var tags = GetTags(guildID);
                     int wuggy_number = (int)(Data.Random.NextDouble() * 1000000000) + 1;
-                    string[] t = (from x in GetTags(guildID) select x.Split(";")[0]).ToArray();
                     await message.Channel.SendMessageAsync(
-                        embed: MakeListEmbed(wuggy_number, t),
-                        components: MakeListComponents("UPDATELISTEMBED", wuggy_number, t)
+                        embed: MakeListEmbed(wuggy_number, tags),
+                        components: MakeListComponents("UPDATELISTEMBED", wuggy_number, tags.Length)
                     );
                 }
             }
@@ -245,20 +246,20 @@ partial class Program : object {
 
 internal static class Data {
     public static DateTime StartTime = DateTime.MinValue;
-    public static string prefix = "hey flowmeter ";
+    public static readonly string prefix = "hey flowmeter ";
     public static readonly List<ulong> CoolServers = [
-        1178285875608698951, // ctqa stnad
+        1287684990041063445, // ctqa stnad
         1202574174946861076, // h++
         854614974525472798,  // a silly server
         1183418786481700925, // this server is real fucked up
         1232247180480479282  // cube's junkyard
     ];
-    public readonly static ulong[] botsToReplyTo = [
+    public static readonly ulong[] botsToReplyTo = [
         811569586675515433,  // ammeter
         1030817797921583236, // ICOSAHEDROOOOOOOO
         1204295911367512084  // abotmination amotbination
     ];
-    public readonly static ulong[] trustedPeople = [
+    public static readonly ulong[] trustedPeople = [
         558979299177136164,   // tema5002
         903650492754845728,   // slinx92
         986132157967761408,   // slinx93
@@ -275,7 +276,7 @@ internal static class Data {
         1204295911367512084,  // abotmination amotbination
         1056952213056004118   // lampadaire
     ];
-    public static Random Random = new();
+    public static readonly Random Random = new();
     public static async Task<RestMessage> ReplyAsync(this IMessage msg,
         string? text = null, bool isTTS = false, Embed? embed = null, RequestOptions? options = null, AllowedMentions? allowedMentions = null, MessageComponent? components = null, ISticker[]? stickers = null, Embed[]? embeds = null, MessageFlags flags = MessageFlags.None) {
         return (RestMessage)await msg.Channel.SendMessageAsync(text, isTTS, embed, options, allowedMentions, new MessageReference(msg.Id), components, stickers, embeds, flags);
@@ -286,12 +287,12 @@ internal class CommandModule : InteractionModuleBase {
     public InteractionService? Service {get; set;}
 
     [SlashCommand("ping", "get ping")]
-    public async Task Ping() {
+    public async Task PingSlashCommand() {
         await RespondAsync(((DiscordSocketClient)Context.Client).Latency + "ms");
     }
 
     [SlashCommand("help", "get help")]
-    public async Task Help() {
+    public async Task HelpSlashCommand() {
         await RespondAsync(embed: new EmbedBuilder() {
             Title = "Flowmeter",
             Description = $@"bot made by tema5002
@@ -320,20 +321,13 @@ internal class CommandModule : InteractionModuleBase {
     }
 
     [SlashCommand("check", "check by which tags message was triggered")]
-    public async Task Check(string h) {
-        string[] TAGS = (from x in Program.GetTags(((SocketGuildChannel)Context.Channel).Guild.Id)
-                         where 3 <= x.Count(c => c == ';') && x.Count(c => c == ';') <= 4 && Program.Check(x, h)
-                         select x).ToArray();
-        if (TAGS.Length > 0) {
-            await RespondAsync(
-                embed: new EmbedBuilder() {
-                    Title = $"This was triggered by {TAGS.Length} tags",
-                    Description = string.Join("\n", from x in TAGS select $"- {x}")
-                }.Build()
-            );
-        }
-        else {
-            await RespondAsync("null <:fluent_bug:1203623430948130866>");
-        }
+    public async Task CheckSlashCommand(string h) {
+        var tags = GetTags(((SocketGuildChannel)Context.Channel).Guild.Id).Where(x => Check(x, h));
+        if (tags.Any())
+            await RespondAsync(embed: new EmbedBuilder() {
+                Title = $"This was triggered by {tags.Count()} tags",
+                Description = string.Join('\n', tags.Select(x => $"- {x}"))
+            }.Build());
+        else await RespondAsync("null <:fluent_bug:1203623430948130866>");
     }
 }

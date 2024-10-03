@@ -3,12 +3,14 @@
 namespace Flowmeter;
 
 partial class Program {
-    public static Embed MakeListEmbed(int page, string[] list) => new EmbedBuilder() {
-        Title = $"Page {page}/{(list.Length + 9) / 10}",
-        Description = string.Join("\n", from s in list.Skip((page - 1) * 10).Take(page == (list.Length + 9) / 10 ? list.Length % 10 : 10) select $"- {s}")
+    public static Embed MakeListEmbed(int page, string[] tags) => new EmbedBuilder() {
+        Title = $"Page {page}/{(tags.Length + 9) / 10}",
+        Description = string.Join('\n',
+            tags.Skip((page - 1) * 10).Take(page == (tags.Length + 9) / 10 ? tags.Length % 10 : 10).Select(x => $"- {x.Split(";")[0]}")
+        )
     }.Build();
 
-    public static Discord.MessageComponent MakeListComponents(string what, int page, string[] pages) {
+    public static Discord.MessageComponent MakeListComponents(string what, int page, int tagsLength) {
         ActionRowBuilder components = new();
 
         void c(string s, int? id) => components.AddComponent(new ButtonBuilder(
@@ -17,7 +19,7 @@ partial class Program {
             style: ButtonStyle.Secondary
         ).Build());
 
-        int m = (pages.Length + 9) / 10;
+        int m = (tagsLength + 9) / 10;
         if (2 < page && page <= m   ) c("⏪", 1);
         if (1 < page && page <= m   ) c("<", page - 1);
         if (0 < page && page < m    ) c(">", page + 1);

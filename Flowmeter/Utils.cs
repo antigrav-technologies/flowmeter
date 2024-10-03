@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Flowmeter;
 
-partial class Program {
+public static class Utils {
     public static bool SkillIssued(IGuildUser user) => !(user.GuildPermissions.Administrator || Data.trustedPeople.Contains(user.Id));
 
     public static string GetFilePath(ulong id) {
@@ -29,6 +29,7 @@ partial class Program {
     }
 
     public static bool Check(string rule, string msg) {
+        if (rule.Count(x => x == ';') < 3) return false;
         var msgl = msg.ToLower();
         var h = rule.Split(";");
         var keyword = h[0];
