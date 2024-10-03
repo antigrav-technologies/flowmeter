@@ -20,7 +20,7 @@ public static class Utils {
 
     public static string[] GetTags(ulong id) => File.ReadAllLines(GetFilePath(id));
 
-    public static void AddLine(ulong id, string line) => File.AppendAllLines(GetFilePath(id), [line]);
+    public static void AddLine(ulong id, string line) => File.WriteAllLines(GetFilePath(id), [..GetTags(id), line]);
 
     public static void RemoveLine(ulong id, string line) {
         var tags = GetTags(id).ToList();
