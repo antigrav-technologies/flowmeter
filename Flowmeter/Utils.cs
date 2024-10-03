@@ -29,7 +29,7 @@ public static class Utils {
     }
 
     public static bool Check(string rule, string msg) {
-        if (rule.Count(x => x == ';') < 3) return false;
+        if (rule.Count(x => x == ';') < 2) return false;
         var msgl = msg.ToLower();
         var h = rule.Split(";");
         var keyword = h[0];
