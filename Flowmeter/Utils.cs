@@ -1,20 +1,17 @@
 ﻿using Discord;
-using System.Data;
 using System.Text.RegularExpressions;
 
 namespace Flowmeter;
 
 public static class Utils {
-    public static bool SkillIssued(IGuildUser user) => !(user.GuildPermissions.Administrator || Data.trustedPeople.Contains(user.Id));
+    public static bool SkillIssued(IGuildUser user) => !(user.GuildPermissions.Administrator || Data.TRUSTED_PEOPLE.Contains(user.Id));
 
-    public static string GetFilePath(ulong id) {
-        if (Data.CoolServers.Contains(id)) id = 1042064947867287643;
-        string path = "D:\\flowmeter data\\tags";
-        if (!Directory.Exists(path))
-            Directory.CreateDirectory(path);
-        path = Path.Join(path, id.ToString() + ".txt");
-        if (!File.Exists(path))
-            File.Create(path);
+    private static string GetFilePath(ulong id) {
+        if (Data.COOL_SERVERS.Contains(id)) id = 1042064947867287643;
+        string path = "tags";
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        path = Path.Join(path, $"{id}.txt");
+        if (!File.Exists(path)) File.Create(path);
         return path;
     }
 
@@ -47,18 +44,18 @@ public static class Utils {
         );
     }
 
-    public static string CheckRule(string rule, ulong? guildID) {
+    public static string CheckRule(string rule, ulong? guildId) {
         string[] args = ["react", "delete"];
         string[] detectionTypes = ["=", "==", "default", "split", "startswith", "endswith", "regex", "REGEX"];
-        string[] ruleSplited = (from i in rule.Split(";") select i.Trim()).ToArray();
+        string[] ruleSplited = rule.Split(";").Select(i => i.Trim()).ToArray();
         rule = string.Join(";", ruleSplited);
         int a = ruleSplited.Length;
-        if (3 > a || a > 4)
+        if (a is < 3 or > 4)
             return $"you need to type **3**-**4** arguments here but **{a}** was given";
         string keyword = ruleSplited[0];
         string detectionType = ruleSplited[1];
         string reply = ruleSplited[2];
-        if (guildID != null && GetTags((ulong)guildID).Any(tag => tag.Split(";")[0] == keyword))
+        if (guildId != null && GetTags((ulong)guildId).Any(tag => tag.Split(";")[0] == keyword))
             return "silly you already have added that tag";
         if (keyword.Length > 125)
             return "keyword cant be longer than 125 symbols";
@@ -78,7 +75,7 @@ public static class Utils {
             return "neither emoji id or unicode emoji";
         if (detectionType == "regex") {
             try {
-                Regex.Match("", keyword);
+                _ = Regex.Match("", keyword);
             }
             catch (ArgumentException ex) {
                 return $"invalid regex: {ex.Message}";
