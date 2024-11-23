@@ -13,7 +13,8 @@ internal class Program {
         GatewayIntents = GatewayIntents.All,
         UseInteractionSnowflakeDate = false
     });
-    readonly InteractionService _interactionService = new(CLIENT.Rest);
+
+    private readonly InteractionService _interactionService = new(CLIENT.Rest);
 
     public static Task Main() => new Program().MainAsync();
     // bot setup is done here
@@ -127,6 +128,7 @@ internal class Program {
                 await message.ReplyAsync("shore i guess");
             }
         }
+
         else if (msgl.StartsWith("add tag ")) {
             if (SkillIssued((IGuildUser)message.Author)) {
                 await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
@@ -196,6 +198,17 @@ internal class Program {
                 components: EmbedMaker.MakeComponents("UPDATELISTEMBED", 1, tags.Length)
             );
         }
+ 
+        else if (msgl == "sort tags") {
+            if (SkillIssued((IGuildUser)message.Author)) {
+                await message.Channel.SendMessageAsync("why dont you sort some bitches");
+            }
+            else {
+                SortTags(guildId);
+                await message.Channel.SendMessageAsync("h o u s e r 🦡😬");
+            }
+        }
+        
         else if (message.Content[Data.PREFIX.Length..] == "DO WHAT THE FUCK DO YOU WANT") {
             var tags = GetTags(guildId);
             int wuggyNumber = (int)(Data.RANDOM.NextDouble() * 1000000000) + 1;

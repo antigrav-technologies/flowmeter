@@ -17,6 +17,12 @@ public static class Utils {
 
     public static string[] GetTags(ulong id) => File.ReadAllLines(GetFilePath(id));
 
+    public static void SortTags(ulong id) {
+        string[] lines = GetTags(id);
+        Array.Sort(lines, StringComparer.OrdinalIgnoreCase);
+        File.WriteAllLines(GetFilePath(id), lines);
+    }
+    
     public static void AddLine(ulong id, string line) => File.WriteAllLines(GetFilePath(id), [..GetTags(id), line]);
 
     public static void RemoveLine(ulong id, string line) {
