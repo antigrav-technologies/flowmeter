@@ -8,10 +8,11 @@ internal static class Data {
 
     public static readonly ulong[] COOL_SERVERS = [
         1287684990041063445, // ctqa stnad
-        1202574174946861076, // h++
+        1202574174946861076, // Чат против вонять подмышка бургер тайвань!
         854614974525472798,  // a silly server
         1183418786481700925, // this server is real fucked up
-        1232247180480479282  // cube's junkyard
+        1232247180480479282, // cube's warehouse
+        1176906188139528223  // -x²
     ];
     public static readonly ulong[] BOTS_TO_REPLY_TO = [
         811569586675515433,  // ammeter
