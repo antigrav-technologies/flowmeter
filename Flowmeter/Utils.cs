@@ -37,7 +37,7 @@ public static class Utils {
         return path;
     }
     
-    private static string GetTagsPath(ulong id) => GetFilePath([DATA_PATH, "tags", $"{(COOL_SERVERS.Contains(id) ? SLINX_ATTIC_ID : id)}.txt"], "");
+    private static string GetTagsPath(ulong id) => GetFilePath([DATA_PATH, "tags", $"{(COOL_SERVERS.Contains(id) ? SLINX_ATTIC : id)}.txt"], "");
 
     public static string[] GetTags(ulong id) => File.ReadAllLines(GetTagsPath(id));
 

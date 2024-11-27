@@ -6,7 +6,8 @@ namespace Flowmeter;
 
 internal static class Data {
     public const string PREFIX = "hey flowmeter ";
-    public const ulong SLINX_ATTIC_ID = 1042064947867287643;
+    public const ulong SLINX_ATTIC = 1042064947867287643;
+    public const ulong TEMA5002 = 558979299177136164;
     public static readonly string DATA_PATH = GetFolderPath(["data"]);
     
     public static readonly string[] TAG_ARGUMENTS = [
@@ -28,11 +29,11 @@ internal static class Data {
         "REGEX"
     ];
 
-    public static readonly IEnumerable<ulong> COOL_SERVERS = ReadUlongData(GetFilePath([DATA_PATH, "cool_servers.txt"], ""));
+    public static IEnumerable<ulong> COOL_SERVERS = ReadUlongData(GetFilePath([DATA_PATH, "cool_servers.txt"], ""));
     
-    public static readonly IEnumerable<ulong> BOTS_TO_REPLY_TO = ReadUlongData(GetFilePath([DATA_PATH, "bots_to_reply_to.txt"], ""));
+    public static IEnumerable<ulong> BOTS_TO_REPLY_TO = ReadUlongData(GetFilePath([DATA_PATH, "bots_to_reply_to.txt"], ""));
     
-    public static readonly IEnumerable<ulong> TRUSTED_PEOPLE = ReadUlongData(GetFilePath([DATA_PATH, "trusted_people.txt"], ""));
+    public static IEnumerable<ulong> TRUSTED_PEOPLE = ReadUlongData(GetFilePath([DATA_PATH, "trusted_people.txt"], ""));
     public static readonly Random RANDOM = new();
     public static async Task<RestMessage> ReplyAsync(this IMessage msg,
         string? text = null, bool isTts = false, Embed? embed = null, RequestOptions? options = null, AllowedMentions? allowedMentions = null, MessageComponent? components = null, ISticker[]? stickers = null, Embed[]? embeds = null, MessageFlags flags = MessageFlags.None) {

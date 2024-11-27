@@ -205,6 +205,18 @@ internal class Program {
             }
         }
         
+        else if (msgl == "download wuggy games") {
+            if (message.Author.Id == Data.TEMA5002) {
+                await message.Channel.SendMessageAsync("i am gonna touch you in a sexual way if you will not shut the fu");
+            }
+            else {
+                Data.COOL_SERVERS = ReadUlongData(GetFilePath([Data.DATA_PATH, "cool_servers.txt"], ""));
+                Data.BOTS_TO_REPLY_TO = ReadUlongData(GetFilePath([Data.DATA_PATH, "bots_to_reply_to.txt"], ""));
+                Data.TRUSTED_PEOPLE = ReadUlongData(GetFilePath([Data.DATA_PATH, "trusted_people.txt"], ""));
+                await message.Channel.SendMessageAsync("apparently there wasnt any exceptions which is probably cool");
+            }
+        }
+        
         else if (message.Content[Data.PREFIX.Length..] == "DO WHAT THE FUCK DO YOU WANT") {
             var tags = GetTags(guildId);
             int wuggyNumber = (int)(Data.RANDOM.NextDouble() * 1000000000) + 1;
