@@ -1,41 +1,38 @@
 using Discord;
 using Discord.Rest;
+using static Flowmeter.Utils;
 
 namespace Flowmeter;
 
 internal static class Data {
     public const string PREFIX = "hey flowmeter ";
+    public const ulong SLINX_ATTIC_ID = 1042064947867287643;
+    public static readonly string DATA_PATH = GetFolderPath(["data"]);
+    
+    public static readonly string[] TAG_ARGUMENTS = [
+        "react",
+        "delete"
+    ];
+    public static readonly string[] DETECTION_TYPES = [
+        "=",
+        "==",
+        "default",
+        "DEFAULT",
+        "split",
+        "SPLIT",
+        "startswith",
+        "STARTSWITH",
+        "endswith",
+        "ENDSWITH",
+        "regex",
+        "REGEX"
+    ];
 
-    public static readonly ulong[] COOL_SERVERS = [
-        1287684990041063445, // ctqa stnad
-        1202574174946861076, // Чат против вонять подмышка бургер тайвань!
-        854614974525472798,  // a silly server
-        1183418786481700925, // this server is real fucked up
-        1232247180480479282, // cube's warehouse
-        1176906188139528223  // -x²
-    ];
-    public static readonly ulong[] BOTS_TO_REPLY_TO = [
-        811569586675515433,  // ammeter
-        1030817797921583236, // ICOSAHEDROOOOOOOO
-        1204295911367512084  // abotmination amotbination
-    ];
-    public static readonly ulong[] TRUSTED_PEOPLE = [
-        558979299177136164,   // tema5002
-        903650492754845728,   // slinx92
-        986132157967761408,   // slinx93
-        1163914091270787125,  // dtpls20
-        801078409076670494,   // hexahedron1
-        1143072932596305932,  // kesslon1632
-        710621353128099901,   // rech2020
-        712639066373619754,   // aflyde
-        1186681736936050691,  // ammeter.
-        1122540181984120924,  // voltmeter2
-        1172796751216906351,  // aperturesanity
-        811569586675515433,   // ammeter
-        1030817797921583236,  // ICOSAHEDROOOOOOOO
-        1204295911367512084,  // abotmination amotbination
-        1056952213056004118   // lampadaire
-    ];
+    public static readonly IEnumerable<ulong> COOL_SERVERS = ReadUlongData(GetFilePath([DATA_PATH, "cool_servers.txt"], ""));
+    
+    public static readonly IEnumerable<ulong> BOTS_TO_REPLY_TO = ReadUlongData(GetFilePath([DATA_PATH, "bots_to_reply_to.txt"], ""));
+    
+    public static readonly IEnumerable<ulong> TRUSTED_PEOPLE = ReadUlongData(GetFilePath([DATA_PATH, "trusted_people.txt"], ""));
     public static readonly Random RANDOM = new();
     public static async Task<RestMessage> ReplyAsync(this IMessage msg,
         string? text = null, bool isTts = false, Embed? embed = null, RequestOptions? options = null, AllowedMentions? allowedMentions = null, MessageComponent? components = null, ISticker[]? stickers = null, Embed[]? embeds = null, MessageFlags flags = MessageFlags.None) {

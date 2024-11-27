@@ -14,43 +14,42 @@ internal class Program {
         UseInteractionSnowflakeDate = false
     });
 
-    private readonly InteractionService _interactionService = new(CLIENT.Rest);
+    private readonly InteractionService interactionService = new(CLIENT.Rest);
 
     public static Task Main() => new Program().MainAsync();
     // bot setup is done here
     private async Task MainAsync() {
-        await _interactionService.AddModuleAsync<CommandModule>(null);
+        await interactionService.AddModuleAsync<CommandModule>(null);
         CLIENT.Log += Log;
         CLIENT.Ready += Ready;
         CLIENT.SlashCommandExecuted += SlashCommandExecuted;
         CLIENT.SelectMenuExecuted += Client_SelectMenuExecuted;
         CLIENT.MessageReceived += Client_MessageReceived;
         CLIENT.ButtonExecuted += InteractionExecuted;
-        _interactionService.Log += Log;
+        interactionService.Log += Log;
         await CLIENT.LoginAsync(TokenType.Bot, TOKEN);
         await CLIENT.StartAsync();
         await Task.Delay(-1);
     }
 
     private async Task<Task> Client_SelectMenuExecuted(SocketMessageComponent cmd) {
-        await _interactionService.ExecuteCommandAsync(new InteractionContext(CLIENT, cmd, cmd.Channel), null);
+        await interactionService.ExecuteCommandAsync(new InteractionContext(CLIENT, cmd, cmd.Channel), null);
         return Task.CompletedTask;
     }
 
     private async Task<Task> SlashCommandExecuted(SocketSlashCommand cmd) {
-        await _interactionService.ExecuteCommandAsync(new InteractionContext(CLIENT, cmd, cmd.Channel), null);
+        await interactionService.ExecuteCommandAsync(new InteractionContext(CLIENT, cmd, cmd.Channel), null);
         return Task.CompletedTask;
     }
 
     private async Task<Task> InteractionExecuted(SocketMessageComponent component) {
         ulong guildId = ((SocketGuildChannel)component.Channel).Guild.Id;
-        string h = component.Data.CustomId;
-        string[] h_ = h.Split(";");
-        if (h == "?") {
+        string[] h = component.Data.CustomId.Split(";");
+        if (h[0] == "?") {
             await component.RespondAsync("what the fuck have you done", ephemeral: true);
         }
-        else if (h_[0] == "UPDATELISTEMBED") {
-            int pageToGo = int.Parse(h_[1]);
+        else if (h[0] == "UPDATELISTEMBED") {
+            int pageToGo = int.Parse(h[1]);
             string[] tags = GetTags(guildId);
             await component.UpdateAsync(m => {
                 m.Embed = EmbedMaker.MakeEmbed(pageToGo, tags);
@@ -66,7 +65,7 @@ internal class Program {
     }
 
     private async Task<Task> Ready() {
-        await _interactionService.RegisterCommandsGloballyAsync();
+        await interactionService.RegisterCommandsGloballyAsync();
         
         кансоль.WriteLine($"@{CLIENT.CurrentUser.Username}#{CLIENT.CurrentUser.Discriminator} is now ready");
 
@@ -120,7 +119,7 @@ internal class Program {
             }
         }
 
-        if (msgl == "can i add tags") {
+        else if (msgl == "can i add tags") {
             if (SkillIssued((IGuildUser)message.Author)) {
                 await message.ReplyAsync("No shitting Sherlocking 🔒\nHow to Sherlock your Shit Tutorial");
             }
@@ -134,13 +133,12 @@ internal class Program {
                 await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
             }
             else {
-                string rule = CheckRule(message.Content[(Data.PREFIX.Length + 8)..], guildId);
-                if (!rule.Contains(';')) {
-                    await message.ReplyAsync(rule);
+                if (!CheckTag(message.Content[(Data.PREFIX.Length + 8)..], guildId, out string tag)) {
+                    await message.ReplyAsync(tag);
                 }
                 else {
-                    AddLine(guildId, rule);
-                    await message.ReplyAsync($"`{rule}` was added to **{guildName}**'s tags");
+                    AddTag(guildId, tag);
+                    await message.ReplyAsync($"`{tag}` was added to **{guildName}**'s tags");
                 }
             }
         }
@@ -150,17 +148,15 @@ internal class Program {
                 await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
             }
             else {
-                string rule = CheckRule(message.Content[(Data.PREFIX.Length + 11)..], null);
-                if (!rule.Contains(';')) {
-                    await message.ReplyAsync(rule);
+                if (!CheckTag(message.Content[(Data.PREFIX.Length + 8)..], guildId, out string tag)) {
+                    await message.ReplyAsync(tag);
                 }
                 else {
-                    string[] ruleSplited = [.. rule.Split(";")];
-                    string? oldRule = GetTags(guildId).FirstOrDefault(tag => tag.Split(";")[0] == ruleSplited[0]);
+                    string? oldRule = GetTags(guildId).FirstOrDefault(t => t.Split(";")[0] == tag.Split(";")[0]);
                     if (oldRule != null) {
-                        RemoveLine(guildId, oldRule);
-                        AddLine(guildId, rule);
-                        await message.ReplyAsync($"updated `{oldRule}` to `{rule}` on **{guildName}**");
+                        RemoveTag(guildId, oldRule);
+                        AddTag(guildId, tag);
+                        await message.ReplyAsync($"updated `{oldRule}` to `{tag}` on **{guildName}**");
                     }
                     else {
                         await message.ReplyAsync("cant find that rule");
@@ -182,7 +178,7 @@ internal class Program {
                     break;
                 }
                 if (tags.Contains(rule)) {
-                    RemoveLine(guildId, rule);
+                    RemoveTag(guildId, rule);
                     await message.ReplyAsync($"`{rule}` was removed from **{guildName}**'s tags");
                 }
                 else {
