@@ -145,7 +145,7 @@ internal class Program {
 
         else if (msgl.StartsWith("update tag ")) {
             if (SkillIssued((IGuildUser)message.Author)) {
-                await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
+                await message.Channel.SendMessageAsync("Shut the Pup Up or You Get No Balls");
             }
             else {
                 if (!CheckTag(message.Content[(Data.PREFIX.Length + 8)..], guildId, out string tag)) {
@@ -206,14 +206,14 @@ internal class Program {
         }
         
         else if (msgl == "download wuggy games") {
-            if (message.Author.Id == Data.TEMA5002) {
+            if (message.Author.Id != Data.TEMA5002) {
                 await message.Channel.SendMessageAsync("i am gonna touch you in a sexual way if you will not shut the fu");
             }
             else {
                 Data.COOL_SERVERS = ReadUlongData(GetFilePath([Data.DATA_PATH, "cool_servers.txt"], ""));
                 Data.BOTS_TO_REPLY_TO = ReadUlongData(GetFilePath([Data.DATA_PATH, "bots_to_reply_to.txt"], ""));
                 Data.TRUSTED_PEOPLE = ReadUlongData(GetFilePath([Data.DATA_PATH, "trusted_people.txt"], ""));
-                await message.Channel.SendMessageAsync("apparently there wasnt any exceptions which is probably cool");
+                await message.Channel.SendMessageAsync("🦈💀 Ah, looks like we're off to a great start! What's your take on the intricacies of шкилы and their supposed connection to субботу утром? 😏");
             }
         }
         
