@@ -167,7 +167,7 @@ internal class Program {
 
         else if (msgl.StartsWith("remove tag ")) {
             if (SkillIssued((IGuildUser)message.Author)) {
-                await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
+                await message.Channel.SendMessageAsync("SORRY MARI2 BUT I CANNOT FULFIL THIS REQUEST BECAUSE I AM AROACE 🔥🔥🔥🔥🔥🗣️🗣️🗣️🗣️🗣️🗣️🗣️🗣️🗣️🗣️🗣️");
             }
             else {
                 string[] tags = GetTags(guildId);
