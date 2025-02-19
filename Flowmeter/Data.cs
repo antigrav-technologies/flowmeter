@@ -9,7 +9,7 @@ internal static class Data {
     public const ulong SLINX_ATTIC = 1042064947867287643;
     public const ulong TEMA5002 = 558979299177136164;
     public const ulong RECHIE2020 = 710621353128099901;
-    public static readonly string DATA_PATH = GetFolderPath(["data"]);
+    public static readonly string DATA_PATH = GetFolderPath([AppDomain.CurrentDomain.BaseDirectory, "data"]);
     
     public static readonly string[] TAG_ARGUMENTS = [
         "react",

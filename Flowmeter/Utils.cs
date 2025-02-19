@@ -1,4 +1,4 @@
-﻿using Discord;
+using Discord;
 using static Flowmeter.Data;
 using System.Text.RegularExpressions;
 
