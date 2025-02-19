@@ -44,7 +44,7 @@ public static class Utils {
         return TAGS_BUFFER[id];
     }
 
-    private static void WriteTags(ulong id, IEnumerable<string> tags) {
+    private static void WriteTags(ulong id, string[] tags) {
         TAGS_BUFFER[id] = tags;
         File.WriteAllLines(GetTagsPath(id), tags);
     }
@@ -57,7 +57,7 @@ public static class Utils {
     
     public static void AddTag(ulong id, string line) => WriteTags(id, [..GetTags(id), line]);
 
-    public static void RemoveTag(ulong id, string line) => WriteTags(id, GetTags(id).Where(x => x != line));
+    public static void RemoveTag(ulong id, string line) => WriteTags(id, GetTags(id).Where(x => x != line).ToArray());
 
     public static bool Check(string rule, string msg) {
         if (rule.Count(x => x == ';') < 2) return false;
