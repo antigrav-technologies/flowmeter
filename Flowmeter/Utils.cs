@@ -39,7 +39,10 @@ public static class Utils {
     
     private static string GetTagsPath(ulong id) => GetFilePath([DATA_PATH, "tags", $"{(COOL_SERVERS.Contains(id) ? SLINX_ATTIC : id)}.txt"], "");
 
-    public static string[] GetTags(ulong id) => File.ReadAllLines(GetTagsPath(id));
+    public static string[] GetTags(ulong id) {
+        if (!TAGS_BUFFER.ContainsKey(id)) TAGS_BUFFER[id] = File.ReadAllLines(GetTagsPath(id));
+        return TAGS_BUFFER[id];
+    }
 
     private static void WriteTags(ulong id, IEnumerable<string> tags) => File.WriteAllLines(GetTagsPath(id), tags);
     

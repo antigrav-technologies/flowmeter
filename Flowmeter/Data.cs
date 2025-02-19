@@ -30,6 +30,8 @@ internal static class Data {
         "REGEX"
     ];
 
+    public static Dictionary<ulong, string[]> TAGS_BUFFER = [];
+
     public static IEnumerable<ulong> COOL_SERVERS = ReadUlongData(GetFilePath([DATA_PATH, "cool_servers.txt"], ""));
     
     public static IEnumerable<ulong> BOTS_TO_REPLY_TO = ReadUlongData(GetFilePath([DATA_PATH, "bots_to_reply_to.txt"], ""));
