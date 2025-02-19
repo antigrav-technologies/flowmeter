@@ -1,4 +1,4 @@
-﻿using Discord;
+using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using кансоль = System.Console;
@@ -7,7 +7,7 @@ using static Flowmeter.Utils;
 namespace Flowmeter;
 
 internal class Program {
-    private static readonly string TOKEN = File.ReadAllText("TOKEN.txt");
+    private static readonly string TOKEN = File.ReadAllText(GetFilePath([AppDomain.CurrentDomain.BaseDirectory, "TOKEN.txt"]));
 
     private static readonly DiscordSocketClient CLIENT = new(new DiscordSocketConfig() {
         GatewayIntents = GatewayIntents.All,
