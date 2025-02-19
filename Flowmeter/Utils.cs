@@ -44,7 +44,10 @@ public static class Utils {
         return TAGS_BUFFER[id];
     }
 
-    private static void WriteTags(ulong id, IEnumerable<string> tags) => File.WriteAllLines(GetTagsPath(id), tags);
+    private static void WriteTags(ulong id, IEnumerable<string> tags) {
+        TAGS_BUFFER[id] = tags;
+        File.WriteAllLines(GetTagsPath(id), tags);
+    }
     
     public static void SortTags(ulong id) {
         string[] lines = GetTags(id);
