@@ -3,6 +3,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using кансоль = System.Console;
 using static Flowmeter.Utils;
+[assembly: System.Reflection.AssemblyVersion("1.0.*")]
 
 namespace Flowmeter;
 
@@ -257,20 +258,21 @@ internal class CommandModule : InteractionModuleBase {
 > Say *{Data.PREFIX}list tags* to **list existing tags on this server**
 > Commands Arguments
 > - **keyword** - keyword which triggers the reply
-> - **detection_type**:
+> - **detection_type** (if uppercase its case sensetive except for =):
 > - - **default** - triggers if **keyword** in message content (not case sensitive)
-> - - **split** - i have no clue how do i explain but it uses python `.split()`
+> - - **split** - triggers only to whole words surrounded by spaces or end of string
 > - - **=** - match
-> - - **==** - exact match (it means case sensitive)
+> - - **==** - exact match (case sensitive)
 > - - **startswith** - triggers when **reply** starts with **keyword**
 > - - **endswith** - triggers when **reply** ends with **keyword**
-> - - **REGEX**/**regex** - case sensitive/not case sensitive regular expression
+> - - **regex** - regular expression
 > - **reply** - a reply
 > - **args**
-> - - react - if this argument is specified then **reply** must be emoji
+> - - react - if this argument is specified then **reply** must be an emoji
 > - - delete - deletes the message
-[support server](https://discord.gg/kCStS6pYqr) (kind of) | [source code](https://github.com/tema5002/flowmeter)",
-            Color = new Color((uint)Data.RANDOM.Next(0x1000000))
+[source code](https://github.com/antigrav-technologies/flowmeter)",
+            Color = new Color((uint)Data.RANDOM.Next(0x1000000)),
+            Footer = new() { Text = GetVersion() }
         }.Build());
     }
 

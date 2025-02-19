@@ -5,6 +5,12 @@ using System.Text.RegularExpressions;
 namespace Flowmeter;
 
 public static class Utils {
+    public static string GetVersion() {
+        Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!;
+        DateTime buildDate = new DateTime(2000, 1, 1).AddDays(version.Build).AddSeconds(version.Revision * 2);
+        return $"build {version} ({buildDate})";
+    }
+
     public static bool SkillIssued(IGuildUser user) => !(user.GuildPermissions.Administrator || Data.TRUSTED_PEOPLE.Contains(user.Id));
 
     public static string GetFolderPath(IEnumerable<string> args) {
@@ -70,9 +76,12 @@ public static class Utils {
                (dp == "=" && keywordl == msgl) ||
                (dp == "==" && keyword == msg) ||
                (dp == "split" && msgl.Split().Contains(keywordl)) ||
-               (dp == "startswith" && msg.StartsWith(keywordl)) ||
-               (dp == "endswith" && msg.EndsWith(keywordl)) ||
-               (dp == "regex" && Regex.IsMatch(msgl, keyword, RegexOptions.IgnoreCase)) ||
+               (dp == "SPLIT" && msg.Split().Contains(keyword)) ||
+               (dp == "startswith" && msgl.StartsWith(keywordl)) ||
+               (dp == "STARTSWITH" && msg.StartsWith(keyword)) ||
+               (dp == "endswith" && msgl.EndsWith(keywordl)) ||
+               (dp == "endswith" && msg.EndsWith(keyword)) ||
+               (dp == "regex" && Regex.IsMatch(msg, keyword, RegexOptions.IgnoreCase)) ||
                (dp == "REGEX" && Regex.IsMatch(msg, keyword));
     }
 
