@@ -207,10 +207,7 @@ internal class Program {
         }
         
         else if (msgl == "download wuggy games") {
-            if (message.Author.Id == Data.RECHIE2020) {
-                await message.Channel.SendMessageAsync("i am gonna touch you in a sexual way if you will not shut the fu");
-            }
-            else if (message.Author.Id != Data.TEMA5002) {
+            if (message.Author.Id != Data.TEMA5002) {
                 await message.Channel.SendMessageAsync("молче мистер петух");
             }
             else {
