@@ -43,15 +43,14 @@ public static class Utils {
         return path;
     }
     
-    private static string GetTagsPath(ulong id) => GetFilePath([DATA_PATH, "tags", $"{(COOL_SERVERS.Contains(id) ? SLINX_ATTIC : id)}.txt"], "");
+    public static string GetTagsPath(ulong id) => GetFilePath([DATA_PATH, "tags", $"{Cool(id)}.txt"], "");
 
     public static string[] GetTags(ulong id) {
-        if (!TAGS_BUFFER.ContainsKey(id)) TAGS_BUFFER[id] = File.ReadAllLines(GetTagsPath(id));
-        return TAGS_BUFFER[id];
+        return Cache.GetCache(id);
     }
 
     private static void WriteTags(ulong id, string[] tags) {
-        TAGS_BUFFER[id] = tags;
+        Cache.SetCache(id, tags);
         File.WriteAllLines(GetTagsPath(id), tags);
     }
     
@@ -85,7 +84,7 @@ public static class Utils {
                (dp == "REGEX" && Regex.IsMatch(msg, keyword));
     }
 
-    public static bool CheckTag(string rule, ulong? guildId, out string result) {
+    public static bool CheckTag(string rule, ulong? guildId, bool update, out string result) {
         string[] ruleSplitted = rule.Split(";").Select(i => i.Trim()).ToArray();
 
         if (ruleSplitted.Length < 3) {
@@ -93,7 +92,7 @@ public static class Utils {
             return false;
         }
 
-        if (guildId != null && GetTags((ulong)guildId).Any(tag => tag.Split(";")[0] == ruleSplitted[0])) {
+        if (!update && guildId != null && GetTags((ulong)guildId).Any(tag => tag.Split(";")[0] == ruleSplitted[0])) {
             result = "silly you already have added that tag";
             return false;
         }

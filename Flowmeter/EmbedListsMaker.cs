@@ -3,11 +3,13 @@
 namespace Flowmeter;
 
 internal static class EmbedMaker {
+    private static int LastPage(int pages) => (pages + 9) / 10;
+    
     public static Embed MakeEmbed(int page, string[] tags) => new EmbedBuilder() {
-        Title = $"Page {page}/{(tags.Length + 9) / 10}",
+        Title = $"Page {page}/{LastPage(tags.Length)}",
         Description = string.Join('\n',
-            tags.Skip((page - 1) * 10).Take(page == (tags.Length + 9) / 10 ? tags.Length % 10 : 10).Select(x => $"- {x.Split(";")[0]}")
-        )
+			tags.Skip((page - 1) * 10).Take(10).Select(x => $"- {x.Split(";")[0]}")
+		)
     }.Build();
 
     public static MessageComponent MakeComponents(string what, int page, int tagsLength) {

@@ -59,22 +59,23 @@ internal class Program {
         }
         else {
             await component.RespondWithFileAsync("what.jpg");
-            await Task.Delay(20 * 1000);
-            await component.DeleteOriginalResponseAsync();
+            Task.Run(async () => {
+	            await Task.Delay(20 * 1000);
+	            await component.DeleteOriginalResponseAsync();
+            });
         }
         return Task.CompletedTask;
     }
 
-    private async Task<Task> Ready() {
+    private async Task Ready() {
         await interactionService.RegisterCommandsGloballyAsync();
         
         кансоль.WriteLine($"@{CLIENT.CurrentUser.Username}#{CLIENT.CurrentUser.Discriminator} is now ready");
 
         while (true) {
-            await CLIENT.SetGameAsync(Data.GAMES[Data.RANDOM.Next(Data.GAMES.Length)]);
+            await CLIENT.SetGameAsync(Data.GAMES[Random.Shared.Next(Data.GAMES.Length)]);
             await Task.Delay(60 * 1000);
         }
-        //return Task.CompletedTask;
     }
 
     private async Task<Task> Client_MessageReceived(SocketMessage message) {
@@ -105,8 +106,14 @@ internal class Program {
                 await message.AddReactionAsync(emojiToReact);
             }
             else {
-                await message.Channel.SendMessageAsync(content);
-                if (args.Contains("delete")) await message.DeleteAsync();
+                var message2 = await message.Channel.SendMessageAsync(content);
+                if (args.Contains("delete")) {
+                    await message.DeleteAsync();
+                    Task.Run(async () => {
+                    	await Task.Delay(10 * 1000);
+                    	await message2.DeleteAsync();
+                   	});
+                }
             }
         }
 
@@ -134,7 +141,7 @@ internal class Program {
                 await message.Channel.SendMessageAsync("perms issue <:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882><:pointlaugh:1128309108001484882>");
             }
             else {
-                if (!CheckTag(message.Content[(Data.PREFIX.Length + 8)..], guildId, out string tag)) {
+                if (!CheckTag(message.Content[(Data.PREFIX.Length + 8)..], guildId, false, out string tag)) {
                     await message.ReplyAsync(tag);
                 }
                 else {
@@ -149,18 +156,19 @@ internal class Program {
                 await message.Channel.SendMessageAsync("Shut the Pup Up or You Get No Balls");
             }
             else {
-                if (!CheckTag(message.Content[(Data.PREFIX.Length + 8)..], guildId, out string tag)) {
+                string tag = message.Content[(Data.PREFIX.Length + 11)..];
+                if (!CheckTag(tag, guildId, true, out tag)) {
                     await message.ReplyAsync(tag);
                 }
                 else {
-                    string? oldRule = GetTags(guildId).FirstOrDefault(t => t.Split(";")[0] == tag.Split(";")[0]);
-                    if (oldRule != null) {
-                        RemoveTag(guildId, oldRule);
+                    string? oldTag = GetTags(guildId).FirstOrDefault(t => t.Split(";")[0] == tag.Split(";")[0]);
+                    if (oldTag != null) {
+                        RemoveTag(guildId, oldTag);
                         AddTag(guildId, tag);
-                        await message.ReplyAsync($"updated `{oldRule}` to `{tag}` on **{guildName}**");
+                        await message.ReplyAsync($"updated `{oldTag}` to `{tag}` on **{guildName}**");
                     }
                     else {
-                        await message.ReplyAsync("cant find that rule");
+                        await message.ReplyAsync("cant find that tag");
                     }
                 }
             }
@@ -171,29 +179,30 @@ internal class Program {
                 await message.Channel.SendMessageAsync("SORRY MARI2 BUT I CANNOT FULFIL THIS REQUEST BECAUSE I AM AROACE 🔥🔥🔥🔥🔥🗣️🗣️🗣️🗣️🗣️🗣️🗣️🗣️🗣️🗣️🗣️");
             }
             else {
+                string tag = message.Content[(Data.PREFIX.Length + 11)..];
                 string[] tags = GetTags(guildId);
-                string rule = message.Content[(Data.PREFIX.Length + 11)..];
-                foreach (string tag in tags) {
-                    if (tag.Split(";")[0] != rule) continue;
-                    rule = tag;
-                    break;
-                }
-                if (tags.Contains(rule)) {
-                    RemoveTag(guildId, rule);
-                    await message.ReplyAsync($"`{rule}` was removed from **{guildName}**'s tags");
+                tag = tags.FirstOrDefault(t => t.Split(";")[0] == tag) ?? tag;
+                if (tags.Contains(tag)) {
+                    RemoveTag(guildId, tag);
+                    await message.ReplyAsync($"`{tag}` was removed from **{guildName}**'s tags");
                 }
                 else {
-                    await message.ReplyAsync($"`{rule}` is not an actual tag you silly");
+                    await message.ReplyAsync($"`{tag}` is not an actual tag you silly");
                 }
             }
         }
 
         else if (msgl == "list tags") {
             var tags = GetTags(guildId);
-            await message.Channel.SendMessageAsync(
-                embed: EmbedMaker.MakeEmbed(1, tags),
-                components: EmbedMaker.MakeComponents("UPDATELISTEMBED", 1, tags.Length)
-            );
+            if (tags.Any()) {
+                await message.Channel.SendMessageAsync(
+                    embed: EmbedMaker.MakeEmbed(1, tags),
+                    components: EmbedMaker.MakeComponents("UPDATELISTEMBED", 1, tags.Length)
+                );
+            }
+            else {
+            	await message.Channel.SendMessageAsync("https://youtu.be/z4FWf_v9yYg");
+            }
         }
  
         else if (msgl == "sort tags") {
@@ -214,13 +223,14 @@ internal class Program {
                 Data.COOL_SERVERS = ReadUlongData(GetFilePath([Data.DATA_PATH, "cool_servers.txt"], ""));
                 Data.BOTS_TO_REPLY_TO = ReadUlongData(GetFilePath([Data.DATA_PATH, "bots_to_reply_to.txt"], ""));
                 Data.TRUSTED_PEOPLE = ReadUlongData(GetFilePath([Data.DATA_PATH, "trusted_people.txt"], ""));
+                Cache.Reset();
                 await message.Channel.SendMessageAsync("🦈💀 Ah, looks like we're off to a great start! What's your take on the intricacies of шкилы and their supposed connection to субботу утром? 😏");
             }
         }
         
         else if (message.Content[Data.PREFIX.Length..] == "DO WHAT THE FUCK DO YOU WANT") {
             var tags = GetTags(guildId);
-            int wuggyNumber = (int)(Data.RANDOM.NextDouble() * 1000000000) + 1;
+            int wuggyNumber = (int)(Random.Shared.NextDouble() * 1000000000) + 1;
             await message.Channel.SendMessageAsync(
                 embed: EmbedMaker.MakeEmbed(wuggyNumber, tags),
                 components: EmbedMaker.MakeComponents("UPDATELISTEMBED", wuggyNumber, tags.Length)
@@ -268,7 +278,7 @@ internal class CommandModule : InteractionModuleBase {
 > - - react - if this argument is specified then **reply** must be an emoji
 > - - delete - deletes the message
 [source code](https://github.com/antigrav-technologies/flowmeter)",
-            Color = new Color((uint)Data.RANDOM.Next(0x1000000)),
+            Color = new Color((uint)Random.Shared.Next(0x1000000)),
             Footer = new() { Text = GetVersion() }
         }.Build());
     }
